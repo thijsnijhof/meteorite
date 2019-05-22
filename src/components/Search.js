@@ -3,8 +3,8 @@ import './Search.css';
 
 const Search = ({value, onChange}) => {
   return (
-    <div>
-      <input type="search" onChange={onChange} value={value}/>
+    <div className="navbar-item">
+      <input className="input is-primary" placeholder="Search for meteorites..." type="search" onChange={onChange} value={value}/>
     </div>
   )
 }
