@@ -23,14 +23,14 @@ export default class App extends Component {
   }
 
   async componentDidMount() {
-    const { resultsLimit, offsetPage, errorMessage } = this.state;
+    const { resultsLimit, offsetPage } = this.state;
     try {
       const response = await fetch(
         `https://data.nasa.gov/resource/gh4g-9sfh.json?$limit=${resultsLimit}&$offset=${offsetPage}`
       );
       const json = await response.json();
       this.setState({ meteoriteData: json }, () => {
-        this.setState({ isLoading: false });
+        this.setState({ isLoading: false, offsetPage: 0 });
       });
     } catch (error) {
       this.setState({
@@ -42,12 +42,7 @@ export default class App extends Component {
   }
 
   searchQuery = e => {
-    this.setState(
-      { filterText: e.target.value, errorMessage: "", displayError: false },
-      () => {
-        console.log(this.state.filterText);
-      }
-    );
+    this.setState({ filterText: e.target.value, errorMessage: "", displayError: false, offsetPage: 0});
   };
 
   handlePaging = e => {
@@ -82,7 +77,7 @@ export default class App extends Component {
           );
           const json = await response.json();
           this.setState({ meteoriteData: json }, () => {
-            this.setState({ isLoading: false });
+            this.setState({ isLoading: false,filterText:'' });
           });
         } catch (error) {
           this.setState({
@@ -145,7 +140,7 @@ export default class App extends Component {
           </button>
         )}
         {displayError && <h2 className="title">{errorMessage}</h2>}
-        <Pagination offsetPage={offsetPage} onPaginate={this.handlePaging} />
+        <Pagination offsetPage={offsetPage} onPaginate={this.handlePaging} meteorites={meteoriteData} />
       </div>
     );
   }
