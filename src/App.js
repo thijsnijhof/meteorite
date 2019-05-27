@@ -15,7 +15,8 @@ export default class App extends Component {
       offsetPage: 0,
       isLoading: true,
       displayError: false,
-      errorMessage: ""
+      errorMessage: "",
+      charError:false
     };
     this.searchQuery = this.searchQuery.bind(this);
     this.handlePaging = this.handlePaging.bind(this);
@@ -42,7 +43,15 @@ export default class App extends Component {
   }
 
   searchQuery = e => {
-    this.setState({ filterText: e.target.value, errorMessage: "", displayError: false, offsetPage: 0});
+    // check query for special characters
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+
+    let checkChars = e.target.value.match(/[|\\/~^:,;?!&%$@*+]/);
+    if(checkChars){
+      this.setState({filterText:e.target.value,charError:'Please use only alphanumerical characters.',displayError:true,offsetPage:0})
+    } else {
+      this.setState({ filterText: e.target.value, errorMessage: "", displayError: false, charError: false,offsetPage: 0});
+    }
   };
 
   handlePaging = e => {
@@ -96,9 +105,7 @@ export default class App extends Component {
             `https://data.nasa.gov/resource/gh4g-9sfh.json?$limit=${resultsLimit}&$offset=${offsetPage}&$order=name%20ASC&$where=lower(name)%20like%20lower(%22%25${lower}%25%22)`
           );
           const json = await response.json();
-          this.setState({ meteoriteData: json, isLoading: false }, () => {
-            console.log("SEARCHQUERY--------", this.state);
-          });
+          this.setState({ meteoriteData: json, isLoading: false });
         } catch (error) {
           this.setState({
             displayError: true,
@@ -111,31 +118,14 @@ export default class App extends Component {
   }
 
   render() {
-    const {
-      meteoriteData,
-      filterText,
-      isLoading,
-      errorMessage,
-      displayError,
-      offsetPage
-    } = this.state;
+    const {meteoriteData,filterText,isLoading, errorMessage,displayError, offsetPage, charError } = this.state;
     return (
       <div>
-        <Navbar
-          value={filterText}
-          onChange={this.searchQuery}
-          onSearch={this.onSearch}
-        />
+        <Navbar value={filterText} onChange={this.searchQuery} onSearch={this.onSearch} displayError={displayError} charError={charError}/>
         {!isLoading ? (
-          <MeteoriteList
-            meteorites={meteoriteData}
-            displayError={displayError}
-          />
+          <MeteoriteList meteorites={meteoriteData} displayError={displayError} />
         ) : (
-          <button
-            className="button is-loading is-primary"
-            style={{ width: "100%", height: "100vh", pointerEvents: "none" }}
-          >
+          <button className="button is-loading is-primary" style={{ width: "100%", height: "100vh", pointerEvents: "none" }}>
             Loading
           </button>
         )}
